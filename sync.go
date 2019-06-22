@@ -47,7 +47,7 @@ func runSync(cmd *Command, args []string) {
 
 	validateOptions()
 
-	prs := findAllPullRequests()
+	prs := findEligiblePullRequests()
 	fmt.Println(prs)
 
 }

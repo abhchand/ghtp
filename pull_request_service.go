@@ -25,7 +25,7 @@ func buildRequest(url string) *http.Request {
 
 }
 
-func findAllPullRequests() PullRequestList {
+func findEligiblePullRequests() PullRequestList {
 
 	httpClient := http.Client{Timeout: time.Second * 2}
 
