@@ -10,11 +10,11 @@ const version = "0.1"
 var flagsForVersion = defineFlagsForVersion()
 
 var cmdVersion = &Command{
-	Name:				"version",
-	ShortDescription:	"Display version",
-	LongDescription:	"Displays the version of ghtp",
-	Run:				runVersion,
-	Flags:				flagsForVersion,
+	Name:             "version",
+	ShortDescription: "Display version",
+	LongDescription:  "Displays the version of ghtp",
+	Run:              runVersion,
+	Flags:            flagsForVersion,
 }
 
 func defineFlagsForVersion() flag.FlagSet {

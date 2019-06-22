@@ -44,7 +44,7 @@ func printHelp(args []string) {
 }
 
 func printUsageError() {
-	printUsage(os.Stderr);
+	printUsage(os.Stderr)
 	os.Exit(1)
 }
 

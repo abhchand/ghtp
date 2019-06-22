@@ -1,23 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	"os"
 )
 
 var log = initializeLogger()
-var verbose	bool
+var verbose bool
 
 var commands = []*Command{
 	cmdVersion,
 	cmdSync,
 }
 
-
 func main() {
 
-	args := parseArgs();
+	args := parseArgs()
 
 	if len(args) < 1 {
 		printUsageError()

@@ -7,14 +7,12 @@ import (
 )
 
 type Command struct {
-
-	Run 				func(cmd *Command, args []string)
-	Name 				string
-	Args 				string
-	ShortDescription 	string
-	LongDescription 	string
-	Flags 				flag.FlagSet
-
+	Run              func(cmd *Command, args []string)
+	Name             string
+	Args             string
+	ShortDescription string
+	LongDescription  string
+	Flags            flag.FlagSet
 }
 
 func (c *Command) PrintUsage() {
@@ -24,7 +22,7 @@ func (c *Command) PrintUsage() {
 	str += fmt.Sprintf("Usage:\n\tghtp %s %s\n", c.Name, c.Args)
 
 	fmt.Printf("%v\n\n", str)
-	c.Flags.PrintDefaults();
+	c.Flags.PrintDefaults()
 	fmt.Print("\n")
 
 	os.Exit(1)
