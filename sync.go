@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"os"
 )
 
 var flagsForSync = defineFlagsForSync()
@@ -47,7 +47,14 @@ func runSync(cmd *Command, args []string) {
 
 	validateOptions()
 
+	// Find eligible pull requests
+
 	prs := findEligiblePullRequests()
-	fmt.Println(prs)
+	log.Infof("Found %v eligible pull request(s)", len(prs))
+
+	if (len(prs) == 0) {
+		log.Info("Exiting")
+		os.Exit(0)
+	}
 
 }
