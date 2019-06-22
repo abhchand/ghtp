@@ -8,6 +8,8 @@ type PullRequest struct {
 	Id      int    `json:"number"`
 	HtmlUrl string `json:"html_url"`
 	Title   string `json:"title"`
+
+	Labels  []PullRequestLabel `json:"labels"`
 }
 
 type PullRequestList []PullRequest
