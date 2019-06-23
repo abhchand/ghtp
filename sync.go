@@ -71,17 +71,19 @@ func runSync(cmd *Command, args []string) {
 
 	for _, pr := range prs {
 
-		tpState := pr.expectedTPState(config.SyncRules)
+		expectedState := pr.expectedTPState(config.SyncRules)
+		actualState := targetProcessStateFor(pr.targetProcessEntityId())
 
-		if len(tpState) == 0 {
-			continue
-		}
-
-		log.Infof("%v/%v#%v should have TargetProcess State '%v'",
+		log.Infof("%v/%v#%v current state: '%v', expected state: '%v'",
 			githubOrganization,
 			githubRepository,
 			pr.Id,
-			tpState)
+			actualState,
+			expectedState)
+
+		if len(expectedState) == 0 {
+			continue
+		}
 
 	}
 

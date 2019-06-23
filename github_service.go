@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func buildRequest(url string) *http.Request {
+func buildIssueRequest(url string) *http.Request {
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 
@@ -36,7 +36,7 @@ func findEligiblePullRequests() PullRequestList {
 	for {
 
 		// Build request
-		request := buildRequest(url)
+		request := buildIssueRequest(url)
 		log.Info("Querying: " + url)
 
 		// Query API

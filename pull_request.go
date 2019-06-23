@@ -2,6 +2,7 @@ package main
 
 import (
 	"regexp"
+	"strconv"
 )
 
 type PullRequest struct {
@@ -98,5 +99,19 @@ func (pr *PullRequest) hasLabel(label string) bool {
 	}
 
 	return false
+
+}
+
+func (pr *PullRequest) targetProcessEntityId() int {
+
+	re := regexp.MustCompile(`\[TP#(\d+)\]`)
+	matches := re.FindAllStringSubmatch(pr.Title, 1)
+
+	id, err := strconv.Atoi(matches[0][1])
+	if err != nil {
+		panic(err)
+	}
+
+	return id
 
 }
