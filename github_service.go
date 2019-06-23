@@ -70,7 +70,7 @@ func findEligiblePullRequests() PullRequestList {
 
 		// Consider only the Pull Requests marked for sync
 		for _, pr := range prs {
-			if pr.ShouldSync() {
+			if pr.shouldSync() {
 				prList = append(prList, pr)
 			}
 		}
