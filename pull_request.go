@@ -9,8 +9,8 @@ type PullRequest struct {
 	HtmlUrl string `json:"html_url"`
 	Title   string `json:"title"`
 
-	Labels          []PullRequestLabel  `json:"labels"`
-	PullRequestData map[string]string `json:"pull_request"`
+	Labels          []PullRequestLabel `json:"labels"`
+	PullRequestData map[string]string  `json:"pull_request"`
 }
 
 type PullRequestList []PullRequest
