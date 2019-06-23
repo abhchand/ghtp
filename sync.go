@@ -10,6 +10,7 @@ var (
 	githubAuthToken        string
 	githubOrganization     string
 	githubRepository       string
+	configFile             string
 	targetProcessAuthToken string
 )
 
@@ -32,6 +33,9 @@ func defineFlagsForSync() flag.FlagSet {
 		&githubOrganization, "gh-org", "", "Github Org (Required)")
 	flagSet.StringVar(
 		&githubRepository, "gh-repo", "", "Github Repository (Required)")
+
+	flagSet.StringVar(
+		&configFile, "config-file", "", "Config File (Required)")
 
 	flagSet.StringVar(
 		&targetProcessAuthToken, "tt", "", "Target Process Token (Required)")
@@ -57,5 +61,10 @@ func runSync(cmd *Command, args []string) {
 		log.Info("Exiting")
 		os.Exit(0)
 	}
+
+	// Parse Config File
+
+	config := readConfigFile()
+	log.Debugf("Config: %v", config)
 
 }
