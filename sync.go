@@ -67,4 +67,22 @@ func runSync(cmd *Command, args []string) {
 	config := readConfigFile()
 	log.Debugf("Config: %v", config)
 
+	// Set the appropriate TP state for each Pull Request
+
+	for _, pr := range prs {
+
+		tpState := pr.expectedTPState(config.SyncRules)
+
+		if len(tpState) == 0 {
+			continue
+		}
+
+		log.Infof("%v/%v#%v should have TargetProcess State '%v'",
+			githubOrganization,
+			githubRepository,
+			pr.Id,
+			tpState)
+
+	}
+
 }

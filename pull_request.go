@@ -50,3 +50,53 @@ func (pr *PullRequest) ShouldSync() bool {
 	return len(matches) > 0
 
 }
+
+// Returns the expected state of the associated TargetProcess story by applying
+// the rules in the config YML file.
+//
+// Rules are applied in the defined order and the first succesful match is
+// returned.
+//
+// All labels and states are case sensitive
+//
+// Example:
+//
+// Assume the following config defined in the YAML file
+//
+//     sync:
+//       - IfHas: chennai
+//         ThenSet: Development
+//       - IfHas: bangalore
+//         ThenSet: Shipped
+//       - IfHas: mumbai
+//         ThenSet: Code Review
+//
+// If a `PullRequest` had labels ["bangalore", "mumbai"], the expected
+// TargetProcess state returned would be "Shipped"
+//
+func (pr *PullRequest) expectedTPState(rules []SyncRule) string {
+
+	for _, rule := range rules {
+		label := rule.IfHas
+		state := rule.ThenSet
+
+		if pr.hasLabel(label) {
+			return state
+		}
+	}
+
+	return ""
+
+}
+
+func (pr *PullRequest) hasLabel(label string) bool {
+
+	for _, prLabel := range pr.Labels {
+		if prLabel.Name == label {
+			return true
+		}
+	}
+
+	return false
+
+}
