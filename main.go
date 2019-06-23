@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/op/go-logging"
 )
 
-var log = initializeLogger()
+var log *logging.Logger
 var verbose bool
 
 var commands = []*Command{
@@ -32,6 +34,8 @@ func main() {
 
 			cmd.Flags.Parse(args[1:])
 			cmdArgs := cmd.Flags.Args()
+
+			log = initializeLogger()
 
 			cmd.Run(cmd, cmdArgs)
 			return
