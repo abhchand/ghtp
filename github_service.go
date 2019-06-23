@@ -37,7 +37,7 @@ func findEligiblePullRequests() PullRequestList {
 
 		// Build request
 		request := buildIssueRequest(url)
-		log.Info("Querying: " + url)
+		log.Debug("Querying: " + url)
 
 		// Query API
 		response, err := httpClient.Do(request)

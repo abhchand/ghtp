@@ -39,7 +39,7 @@ func targetProcessStateFor(entityId int) string {
 
 	// Build request
 	request := buildEntityRequest(url)
-	log.Info("Querying: " + url)
+	log.Debug("Querying: " + url)
 
 	// Query API
 	response, err := httpClient.Do(request)
