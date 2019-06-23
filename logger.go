@@ -21,7 +21,10 @@ func initializeLogger() *logging.Logger {
 		logging.NewLogBackend(os.Stdout, "", 0),
 		format)
 
-	logging.SetBackend(backend)
+	backendLeveled := logging.AddModuleLevel(backend)
+	backendLeveled.SetLevel(logging.INFO, "")
+
+	logging.SetBackend(backendLeveled)
 
 	return logging.MustGetLogger("logger")
 
