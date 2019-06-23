@@ -14,6 +14,10 @@ type PullRequest struct {
 	PullRequestData map[string]string  `json:"pull_request"`
 }
 
+type PullRequestLabel struct {
+	Name string `json:"name"`
+}
+
 type PullRequestList []PullRequest
 
 // Returns the expected state of the associated TargetProcess story by applying
