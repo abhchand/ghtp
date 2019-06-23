@@ -16,7 +16,7 @@ var (
 
 var cmdSync = &Command{
 	Name:             "sync",
-	Args:             "[-gh] [-gh-org] [-gh-repo] [-tt] [-v]",
+	Args:             "[-config-file] [-gh] [-gh-org] [-gh-repo] [-tt] [-v]",
 	ShortDescription: "Update TargetProcess state to match Github PR state",
 	LongDescription:  "Update TargetProcess state to match Github PR state",
 	Run:              runSync,
