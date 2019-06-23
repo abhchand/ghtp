@@ -1,4 +1,6 @@
 .DS_Store
+*.yml
+*.yaml
 
 # Binary executable
 ghtp
