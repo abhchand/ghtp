@@ -81,26 +81,18 @@ func runSync(cmd *Command, args []string) {
 		actualState := targetProcessStateFor(pr.targetProcessEntityId())
 
 		if len(expectedStateName) == 0 {
-			log.Infof("%v/%v#%v No expected state could be determined from rule set",
-				githubOrganization,
-				githubRepository,
-				pr.Id)
+			log.Infof("%v No expected state could be determined from rule set",
+				pr.toString())
 			continue
 		}
 
 		if expectedState.Id == 0 {
-			log.Errorf("%v/%v#%v Invalid state: '%v'",
-				githubOrganization,
-				githubRepository,
-				pr.Id,
-				expectedState)
+			log.Errorf("%v Invalid state: '%v'", pr.toString(), expectedState)
 			continue
 		}
 
-		log.Infof("%v/%v#%v current state: '%v', expected state: '%v' (id: %v)",
-			githubOrganization,
-			githubRepository,
-			pr.Id,
+		log.Infof("%v current state: '%v', expected state: '%v' (id: %v)",
+			pr.toString(),
 			actualState,
 			expectedState.Name,
 			expectedState.Id)

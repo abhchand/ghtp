@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 )
@@ -117,5 +118,11 @@ func (pr *PullRequest) targetProcessEntityId() int {
 	}
 
 	return id
+
+}
+
+func (pr *PullRequest) toString() string {
+
+	return fmt.Sprintf("%v/%v#%v", githubOrganization, githubRepository, pr.Id)
 
 }
