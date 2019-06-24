@@ -43,7 +43,7 @@ type PullRequestList []PullRequest
 // If a `PullRequest` had labels ["bangalore", "mumbai"], the expected
 // TargetProcess state returned would be "Shipped"
 //
-func (pr *PullRequest) expectedTPState(rules []SyncRule) string {
+func (pr *PullRequest) expectedTargetProcessStateName(rules []SyncRule) string {
 
 	for _, rule := range rules {
 		label := rule.IfHas

@@ -67,23 +67,43 @@ func runSync(cmd *Command, args []string) {
 	config := readConfigFile()
 	log.Debugf("Config: %v", config)
 
+	// Fetch all Target Process States
+
+	fetchAllTargetProcessEntityStates()
+
 	// Set the appropriate TP state for each Pull Request
 
 	for _, pr := range prs {
 
-		expectedState := pr.expectedTPState(config.SyncRules)
+		expectedStateName := pr.expectedTargetProcessStateName(config.SyncRules)
+		expectedState := allTargetProcessEntityStates.findByName(expectedStateName)
+
 		actualState := targetProcessStateFor(pr.targetProcessEntityId())
 
-		log.Infof("%v/%v#%v current state: '%v', expected state: '%v'",
+		if len(expectedStateName) == 0 {
+			log.Infof("%v/%v#%v No expected state could be determined from rule set",
+				githubOrganization,
+				githubRepository,
+				pr.Id)
+			continue
+		}
+
+		if expectedState.Id == 0 {
+			log.Errorf("%v/%v#%v Invalid state: '%v'",
+				githubOrganization,
+				githubRepository,
+				pr.Id,
+				expectedState)
+			continue
+		}
+
+		log.Infof("%v/%v#%v current state: '%v', expected state: '%v' (id: %v)",
 			githubOrganization,
 			githubRepository,
 			pr.Id,
 			actualState,
-			expectedState)
-
-		if len(expectedState) == 0 {
-			continue
-		}
+			expectedState.Name,
+			expectedState.Id)
 
 	}
 
