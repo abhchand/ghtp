@@ -23,7 +23,7 @@ func initializeLogger() *logging.Logger {
 
 	var level logging.Level
 
-	if (verbose) {
+	if verbose {
 		level = logging.DEBUG
 	} else {
 		level = logging.INFO
