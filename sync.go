@@ -73,38 +73,55 @@ func runSync(cmd *Command, args []string) {
 	// Set the appropriate TP state for each Pull Request
 
 	for _, pr := range prs {
-
-		targetProcessAssignable := findTargetProcessAssignableById(pr.targetProcessAssignableId())
-
-		currentState := targetProcessAssignable.getCurrentEntityState()
-
-		nextStateName := pr.expectedTargetProcessNextStateName(config.SyncRules)
-		nextState := targetProcessAssignable.findNextStateByName(nextStateName)
-
-		if len(nextStateName) == 0 {
-			log.Infof("[%v] No next state could be determined from rule set",
-				pr.toString())
-			continue
-		}
-
-		if currentState.Name == nextStateName {
-			log.Infof("[%v] Already has state: %v ✅", pr.toString(), currentState.toString())
-			continue
-		}
-
-		if nextState.Id == 0 {
-			log.Errorf("[%v] Invalid state: %v", pr.toString(), nextState.toString())
-			continue
-		}
-
-		log.Infof("[%v] current state: %v, next state: %v",
-			pr.toString(),
-			currentState.toString(),
-			nextState.toString())
-
-		updateTargetProcessEntityState(targetProcessAssignable, nextState)
-
+		synchronize(pr, config)
 	}
+
+}
+
+// Synchronizes TargetProcess state to match Github state for a given Pull
+// Request. It applies the `sync` rules from the config file to determine what
+// TargetProcess state to set for a given set of Github labels.
+//
+// It also performs type checking against TargetProcess to ensure that the
+// desired state is a valid workflow state for that Assignable to move to.
+//
+//   - If no action can be deterined from the rule set, do nothing
+//   - If a TP Assignable already has the desired state, do nothing
+//   - If the desired TargetProcess state is invalid, log an error and continue
+//   - If none of the above apply, attempt to update TargetProcess to the desired
+//     state
+//
+func synchronize(pr PullRequest, config Config) {
+
+	targetProcessAssignable := findTargetProcessAssignableById(pr.targetProcessAssignableId())
+
+	currentState := targetProcessAssignable.getCurrentEntityState()
+
+	nextStateName := pr.expectedTargetProcessNextStateName(config.SyncRules)
+	nextState := targetProcessAssignable.findNextStateByName(nextStateName)
+
+	if len(nextStateName) == 0 {
+		log.Infof("[%v] No next state could be determined from rule set",
+			pr.toString())
+		return
+	}
+
+	if currentState.Name == nextStateName {
+		log.Infof("[%v] Already has state: %v ✅", pr.toString(), currentState.toString())
+		return
+	}
+
+	if nextState.Id == 0 {
+		log.Errorf("[%v] Invalid state: %v", pr.toString(), nextState.toString())
+		return
+	}
+
+	log.Infof("[%v] current state: %v, next state: %v",
+		pr.toString(),
+		currentState.toString(),
+		nextState.toString())
+
+	updateTargetProcessEntityState(targetProcessAssignable, nextState)
 
 }
 
