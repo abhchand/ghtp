@@ -31,7 +31,7 @@ func defineFlagsForSync() flag.FlagSet {
 	flagSet := *flag.NewFlagSet("version", flag.ExitOnError)
 
 	flagSet.StringVar(
-		&configFile, "config-file", "", "Config File (Required)")
+		&configFile, "config-file", "config.yml", "YML Config File of options")
 
 	flagSet.BoolVar(
 		&verbose, "v", false, "Enable verbose output")
