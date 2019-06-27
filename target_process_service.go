@@ -12,7 +12,7 @@ import (
 
 const TP_PAGE_SIZE int = 50
 
-var targetProcessBase = "https://callrail.tpondemand.com"
+var targetProcessHostTemplate = "https://%v.tpondemand.com"
 
 func assignableEndpoint(assignableId int) string {
 
@@ -20,7 +20,7 @@ func assignableEndpoint(assignableId int) string {
 		"%v/api/v1/Assignables/%v?"+
 			"include=[Name,EntityState[Name,NextStates[Id,Name]]]&"+
 			"format=json&access_token=%v",
-		targetProcessBase,
+		targetProcessHost(),
 		assignableId,
 		targetProcessAuthToken)
 
@@ -109,12 +109,18 @@ func queryTargetProcess(request *http.Request) []byte {
 
 }
 
+func targetProcessHost() string {
+
+	return fmt.Sprintf(targetProcessHostTemplate, targetProcessDomain)
+
+}
+
 func updateEntityStateEndpoint(assignable TargetProcessAssignable) string {
 
 	return fmt.Sprintf(
 		"%v/api/v1/Assignables/%v?"+
 			"resultFormat=json&resultInclude=[Id]&access_token=%v",
-		targetProcessBase,
+		targetProcessHost(),
 		assignable.Id,
 		targetProcessAuthToken)
 

@@ -12,6 +12,7 @@ var (
 	githubRepository       string
 	configFile             string
 	targetProcessAuthToken string
+	targetProcessDomain    string
 )
 
 var cmdSync = &Command{
@@ -58,6 +59,7 @@ func runSync(cmd *Command, args []string) {
 
 	githubOrganization = config.Github.Organization
 	githubRepository = config.Github.Repository
+	targetProcessDomain = config.TargetProcess.Domain
 
 	// Find eligible pull requests
 
@@ -153,6 +155,11 @@ func validateSyncConfigFile(config Config) {
 
 	if config.Github.Repository == "" {
 		log.Fatal("Missing Github Repository. Please specify github.repository in config file")
+		os.Exit(1)
+	}
+
+	if config.TargetProcess.Domain == "" {
+		log.Fatal("Missing TargetProcess Domain. Please specify target_process.domain in config file")
 		os.Exit(1)
 	}
 

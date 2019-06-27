@@ -12,6 +12,10 @@ type Config struct {
 		Repository   string `yaml:"repository"`
 	} `yaml:"github"`
 
+	TargetProcess struct {
+		Domain string `yaml:"domain"`
+	} `yaml:"target_process"`
+
 	SyncRules []SyncRule `yaml:"sync"`
 }
 
