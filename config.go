@@ -16,8 +16,8 @@ type Config struct {
 }
 
 type SyncRule struct {
-	IfHas   string `yaml:"IfHas"`
-	ThenSet string `yaml:"ThenSet"`
+	if_has   string `yaml:"if_has"`
+	then_set string `yaml:"then_set"`
 }
 
 func readConfigFile() Config {

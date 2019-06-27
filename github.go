@@ -34,12 +34,12 @@ type PullRequestList []PullRequest
 // Assume the following config defined in the YAML file
 //
 //     sync:
-//       - IfHas: chennai
-//         ThenSet: Development
-//       - IfHas: bangalore
-//         ThenSet: Shipped
-//       - IfHas: mumbai
-//         ThenSet: Code Review
+//       - if_has: chennai
+//         then_set: Development
+//       - if_has: bangalore
+//         then_set: Shipped
+//       - if_has: mumbai
+//         then_set: Code Review
 //
 // If a `PullRequest` had labels ["bangalore", "mumbai"], the expected
 // TargetProcess state returned would be "Shipped"
@@ -47,8 +47,8 @@ type PullRequestList []PullRequest
 func (pr *PullRequest) expectedTargetProcessNextStateName(rules []SyncRule) string {
 
 	for _, rule := range rules {
-		label := rule.IfHas
-		state := rule.ThenSet
+		label := rule.if_has
+		state := rule.then_set
 
 		if pr.hasLabel(label) {
 			return state
