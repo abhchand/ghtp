@@ -7,17 +7,19 @@ import (
 
 var flagsForSync = defineFlagsForSync()
 var (
-	githubAuthToken        string
-	githubOrganization     string
-	githubRepository       string
-	configFile             string
-	targetProcessAuthToken string
+	configFile string
+
+	githubOrganization string
+	githubRepository   string
+	githubAuthToken    string
+
 	targetProcessDomain    string
+	targetProcessAuthToken string
 )
 
 var cmdSync = &Command{
 	Name:             "sync",
-	Args:             "[-config-file] [-gt] [-tt] [-v]",
+	Args:             "[-config-file] [-v]",
 	ShortDescription: "Update TargetProcess state to match Github PR state",
 	LongDescription:  "Update TargetProcess state to match Github PR state",
 	Run:              runSync,
@@ -29,13 +31,7 @@ func defineFlagsForSync() flag.FlagSet {
 	flagSet := *flag.NewFlagSet("version", flag.ExitOnError)
 
 	flagSet.StringVar(
-		&githubAuthToken, "gt", "", "Github Auth Token (Required)")
-
-	flagSet.StringVar(
 		&configFile, "config-file", "", "Config File (Required)")
-
-	flagSet.StringVar(
-		&targetProcessAuthToken, "tt", "", "Target Process Token (Required)")
 
 	flagSet.BoolVar(
 		&verbose, "v", false, "Enable verbose output")
@@ -56,10 +52,7 @@ func runSync(cmd *Command, args []string) {
 	log.Debugf("Config: %v", config)
 
 	validateSyncConfigFile(config)
-
-	githubOrganization = config.Github.Organization
-	githubRepository = config.Github.Repository
-	targetProcessDomain = config.TargetProcess.Domain
+	loadSyncOptions(config)
 
 	// Find eligible pull requests
 
@@ -127,20 +120,34 @@ func synchronize(pr PullRequest, config Config) {
 
 }
 
-func validateSyncArguments() {
+func loadSyncOptions(config Config) {
 
-	if githubAuthToken == "" {
-		log.Fatal("Missing Github Auth Token. Please specify with -gt")
-		os.Exit(1)
+	githubOrganization = config.Github.Organization
+	githubRepository = config.Github.Repository
+
+	targetProcessDomain = config.TargetProcess.Domain
+	targetProcessAuthToken = config.TargetProcess.AuthToken
+
+	var token string
+
+	if token = os.Getenv("GITHUB_AUTH_TOKEN"); token != "" {
+		githubAuthToken = token
+	} else {
+		githubAuthToken = config.Github.AuthToken
 	}
+
+	if token = os.Getenv("TARGET_PROCESS_AUTH_TOKEN"); token != "" {
+		targetProcessAuthToken = token
+	} else {
+		targetProcessAuthToken = config.TargetProcess.AuthToken
+	}
+
+}
+
+func validateSyncArguments() {
 
 	if configFile == "" {
 		log.Fatal("Missing Config File. Please specify with -config-file")
-		os.Exit(1)
-	}
-
-	if targetProcessAuthToken == "" {
-		log.Fatal("Missing TargetProcess Auth Token. Please specify with -tt")
 		os.Exit(1)
 	}
 
@@ -158,8 +165,18 @@ func validateSyncConfigFile(config Config) {
 		os.Exit(1)
 	}
 
+	if os.Getenv("GITHUB_AUTH_TOKEN") == "" && config.Github.AuthToken == "" {
+		log.Fatal("Missing Github AuthToken. Please specify github.auth_token in config file or $GITHUB_AUTH_TOKEN")
+		os.Exit(1)
+	}
+
 	if config.TargetProcess.Domain == "" {
 		log.Fatal("Missing TargetProcess Domain. Please specify target_process.domain in config file")
+		os.Exit(1)
+	}
+
+	if os.Getenv("TARGET_PROCESS_AUTH_TOKEN") == "" && config.TargetProcess.AuthToken == "" {
+		log.Fatal("Missing TargetProcess AuthToken. Please specify target_process.auth_token in config file or $TARGET_PROCESS_AUTH_TOKEN")
 		os.Exit(1)
 	}
 

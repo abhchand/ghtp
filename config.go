@@ -10,10 +10,12 @@ type Config struct {
 	Github struct {
 		Organization string `yaml:"organization"`
 		Repository   string `yaml:"repository"`
+		AuthToken    string `yaml:"auth_token"`
 	} `yaml:"github"`
 
 	TargetProcess struct {
-		Domain string `yaml:"domain"`
+		Domain    string `yaml:"domain"`
+		AuthToken string `yaml:"auth_token"`
 	} `yaml:"target_process"`
 
 	SyncRules []SyncRule `yaml:"sync"`
