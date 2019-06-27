@@ -84,6 +84,11 @@ func runSync(cmd *Command, args []string) {
 			continue
 		}
 
+		if currentState.Name == nextStateName {
+			log.Infof("[%v] Already has state: %v ✅", pr.toString(), currentState.toString())
+			continue
+		}
+
 		if nextState.Id == 0 {
 			log.Errorf("[%v] Invalid state: %v", pr.toString(), nextState.toString())
 			continue
