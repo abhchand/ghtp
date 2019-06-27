@@ -47,8 +47,8 @@ type PullRequestList []PullRequest
 func (pr *PullRequest) expectedTargetProcessNextStateName(rules []SyncRule) string {
 
 	for _, rule := range rules {
-		label := rule.if_has
-		state := rule.then_set
+		label := rule.IfHas
+		state := rule.ThenSet
 
 		if pr.hasLabel(label) {
 			return state
