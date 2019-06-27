@@ -5,7 +5,7 @@ import (
 )
 
 type TargetProcessAssignable struct {
-	ID   int    `json:"Id"`
+	Id   int    `json:"Id"`
 	Name string `json:"Name"`
 
 	EntityState TargetProcessEntityState `json:"EntityState"`
@@ -46,6 +46,12 @@ func (assignable *TargetProcessAssignable) findNextStateByName(name string) Targ
 func (assignable *TargetProcessAssignable) getCurrentEntityState() TargetProcessEntityState {
 
 	return assignable.EntityState
+
+}
+
+func (assignable *TargetProcessAssignable) toString() string {
+
+	return fmt.Sprintf("#%v %v", assignable.Id, assignable.Name)
 
 }
 

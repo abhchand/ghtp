@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -34,6 +35,23 @@ func buildAssignableRequest(url string) *http.Request {
 	}
 
 	req.Header.Set("User-Agent", "abhchand/ghtp")
+
+	return req
+
+}
+
+func buildUpdateEntityStateRequest(url string, payload string) *http.Request {
+
+	body := bytes.NewBuffer([]byte(payload))
+
+	req, err := http.NewRequest(http.MethodPost, url, body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req.Header.Set("User-Agent", "abhchand/ghtp")
+	req.Header.Set("Content-Type", "application/json")
 
 	return req
 
@@ -87,5 +105,39 @@ func queryTargetProcess(request *http.Request) []byte {
 	}
 
 	return body
+
+}
+
+func updateEntityStateEndpoint(assignable TargetProcessAssignable) string {
+
+	return fmt.Sprintf(
+		"%v/api/v1/Assignables/%v?"+
+			"resultFormat=json&resultInclude=[Id]&access_token=%v",
+		targetProcessBase,
+		assignable.Id,
+		targetProcessAuthToken)
+
+}
+
+func updateEntityStatePayload(nextState TargetProcessNextState) string {
+
+	return fmt.Sprintf("{ EntityState:{Id:%v} }", nextState.Id)
+
+}
+
+func updateTargetProcessEntityState(assignable TargetProcessAssignable, nextState TargetProcessNextState) {
+
+	// Build Request
+	url := updateEntityStateEndpoint(assignable)
+	payload := updateEntityStatePayload(nextState)
+	request := buildUpdateEntityStateRequest(url, payload)
+
+	queryTargetProcess(request)
+
+	// `queryTargetProcess()` exits or panics if there's an error, so assume
+	// everything is successful at this point
+	log.Infof("Successfully updated %v to state %v",
+		assignable.toString(),
+		nextState.toString())
 
 }

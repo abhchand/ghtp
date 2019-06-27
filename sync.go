@@ -94,6 +94,8 @@ func runSync(cmd *Command, args []string) {
 			currentState.toString(),
 			nextState.toString())
 
+		updateTargetProcessEntityState(targetProcessAssignable, nextState)
+
 	}
 
 }
