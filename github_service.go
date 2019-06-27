@@ -45,6 +45,7 @@ func findEligiblePullRequests() PullRequestList {
 			log.Fatal(err)
 			panic(err)
 		}
+		defer response.Body.Close()
 
 		// Handle bad HTTP response
 		log.Debugf("Response Status: %s", response.Status)
