@@ -12,9 +12,20 @@ import (
 const TP_PAGE_SIZE int = 50
 
 var targetProcessBase = "https://callrail.tpondemand.com"
-var allTargetProcessEntityStates TargetProcessEntityStateList
 
-func buildEntityRequest(url string) *http.Request {
+func assignableEndpoint(assignableId int) string {
+
+	return fmt.Sprintf(
+		"%v/api/v1/Assignables/%v?"+
+			"include=[Name,EntityState[Name,NextStates[Id,Name]]]&"+
+			"format=json&access_token=%v",
+		targetProcessBase,
+		assignableId,
+		targetProcessAuthToken)
+
+}
+
+func buildAssignableRequest(url string) *http.Request {
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 
@@ -28,72 +39,23 @@ func buildEntityRequest(url string) *http.Request {
 
 }
 
-func buildEntityStateRequest(url string) *http.Request {
+func findTargetProcessAssignableById(id int) TargetProcessAssignable {
 
-	return buildEntityRequest(url)
+	// Build Request
+	url := assignableEndpoint(id)
+	request := buildAssignableRequest(url)
 
-}
+	responseBody := queryTargetProcess(request)
 
-func entityEndpoint(entityId int) string {
-
-	return fmt.Sprintf(
-		"%v/api/v1/Assignables/%v?format=json&access_token=%v",
-		targetProcessBase,
-		entityId,
-		targetProcessAuthToken)
-
-}
-
-func entityStateEndpoint(page int) string {
-
-	return fmt.Sprintf(
-		"%v/api/v1/EntityStates?format=json&take=%v&skip=%v&access_token=%v",
-		targetProcessBase,
-		TP_PAGE_SIZE,
-		(page-1)*TP_PAGE_SIZE,
-		targetProcessAuthToken)
-
-}
-
-func fetchAllTargetProcessEntityStates() TargetProcessEntityStateList {
-
-	var allStates TargetProcessEntityStateList
-	page := 1
-
-	for {
-
-		// Build Request
-		url := entityStateEndpoint(page)
-		request := buildEntityStateRequest(url)
-
-		responseBody := queryTargetProcess(request)
-
-		// Load Response
-		var tpApiResponse TargetProcessEntityStateApiResponse
-		err := json.Unmarshal([]byte(responseBody), &tpApiResponse)
-		if err != nil {
-			log.Fatal(err)
-			panic(err)
-		}
-
-		// Append to list
-		allStates = append(allStates, tpApiResponse.Items...)
-
-		// Check if we should continue (whether a next page exists)
-
-		log.Debugf("Next Page: %s", tpApiResponse.Next)
-		if tpApiResponse.Next == "" {
-			break
-		}
-
-		page++
-
+	// Load Response
+	var assignable TargetProcessAssignable
+	err := json.Unmarshal([]byte(responseBody), &assignable)
+	if err != nil {
+		log.Fatal(err)
+		panic(err)
 	}
 
-	allTargetProcessEntityStates = allStates
-	log.Debugf("Found EntityStates: %v", allTargetProcessEntityStates)
-
-	return allTargetProcessEntityStates
+	return assignable
 
 }
 
@@ -125,25 +87,5 @@ func queryTargetProcess(request *http.Request) []byte {
 	}
 
 	return body
-
-}
-
-func targetProcessStateFor(entityId int) string {
-
-	// Build Request
-	url := entityEndpoint(entityId)
-	request := buildEntityRequest(url)
-
-	responseBody := queryTargetProcess(request)
-
-	// Load Response
-	var entity TargetProcessEntity
-	err := json.Unmarshal([]byte(responseBody), &entity)
-	if err != nil {
-		log.Fatal(err)
-		panic(err)
-	}
-
-	return entity.getState()
 
 }

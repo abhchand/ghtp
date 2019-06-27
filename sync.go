@@ -67,35 +67,32 @@ func runSync(cmd *Command, args []string) {
 	config := readConfigFile()
 	log.Debugf("Config: %v", config)
 
-	// Fetch all Target Process States
-
-	fetchAllTargetProcessEntityStates()
-
 	// Set the appropriate TP state for each Pull Request
 
 	for _, pr := range prs {
 
-		expectedStateName := pr.expectedTargetProcessStateName(config.SyncRules)
-		expectedState := allTargetProcessEntityStates.findByName(expectedStateName)
+		targetProcessAssignable := findTargetProcessAssignableById(pr.targetProcessAssignableId())
 
-		actualState := targetProcessStateFor(pr.targetProcessEntityId())
+		currentState := targetProcessAssignable.getCurrentEntityState()
 
-		if len(expectedStateName) == 0 {
-			log.Infof("%v No expected state could be determined from rule set",
+		nextStateName := pr.expectedTargetProcessNextStateName(config.SyncRules)
+		nextState := targetProcessAssignable.findNextStateByName(nextStateName)
+
+		if len(nextStateName) == 0 {
+			log.Infof("[%v] No next state could be determined from rule set",
 				pr.toString())
 			continue
 		}
 
-		if expectedState.Id == 0 {
-			log.Errorf("%v Invalid state: '%v'", pr.toString(), expectedState)
+		if nextState.Id == 0 {
+			log.Errorf("[%v] Invalid state: %v", pr.toString(), nextState.toString())
 			continue
 		}
 
-		log.Infof("%v current state: '%v', expected state: '%v' (id: %v)",
+		log.Infof("[%v] current state: %v, next state: %v",
 			pr.toString(),
-			actualState,
-			expectedState.Name,
-			expectedState.Id)
+			currentState.toString(),
+			nextState.toString())
 
 	}
 

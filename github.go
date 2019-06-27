@@ -21,8 +21,8 @@ type PullRequestLabel struct {
 
 type PullRequestList []PullRequest
 
-// Returns the expected state of the associated TargetProcess story by applying
-// the rules in the config YML file.
+// Returns the expected entity state of the associated TargetProcess story by
+// applying the rules in the config YML file.
 //
 // Rules are applied in the defined order and the first succesful match is
 // returned.
@@ -44,7 +44,7 @@ type PullRequestList []PullRequest
 // If a `PullRequest` had labels ["bangalore", "mumbai"], the expected
 // TargetProcess state returned would be "Shipped"
 //
-func (pr *PullRequest) expectedTargetProcessStateName(rules []SyncRule) string {
+func (pr *PullRequest) expectedTargetProcessNextStateName(rules []SyncRule) string {
 
 	for _, rule := range rules {
 		label := rule.IfHas
@@ -107,7 +107,7 @@ func (pr *PullRequest) shouldSync() bool {
 
 }
 
-func (pr *PullRequest) targetProcessEntityId() int {
+func (pr *PullRequest) targetProcessAssignableId() int {
 
 	re := regexp.MustCompile(`\[TP#(\d+)\]`)
 	matches := re.FindAllStringSubmatch(pr.Title, 1)

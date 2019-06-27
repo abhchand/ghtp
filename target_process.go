@@ -1,45 +1,62 @@
 package main
 
-type TargetProcessEntity struct {
-	ResourceType string `json:"ResourceType"`
-	ID           int    `json:"Id"`
-	Name         string `json:"Name"`
+import (
+	"fmt"
+)
 
-	State TargetProcessEntityState `json:"EntityState"`
+type TargetProcessAssignable struct {
+	ID   int    `json:"Id"`
+	Name string `json:"Name"`
+
+	EntityState TargetProcessEntityState `json:"EntityState"`
 }
 
 type TargetProcessEntityState struct {
 	Id   int    `json:"Id"`
 	Name string `json:"Name"`
+
+	NextStates struct {
+		Items []TargetProcessNextState `json:"Items"`
+	} `json:"NextStates"`
 }
 
-type TargetProcessEntityStateList []TargetProcessEntityState
-
-type TargetProcessEntityStateApiResponse struct {
-	Next  string                       `json:"Next"`
-	Items TargetProcessEntityStateList `json:"Items"`
+type TargetProcessNextState struct {
+	Id   int    `json:"Id"`
+	Name string `json:"Name"`
 }
 
-func (entity *TargetProcessEntity) getState() string {
+func (assignable *TargetProcessAssignable) findNextStateByName(name string) TargetProcessNextState {
 
-	return entity.State.Name
-
-}
-
-func (entities *TargetProcessEntityStateList) findByName(name string) TargetProcessEntityState {
-
-	emptyEntity := TargetProcessEntityState{}
+	emptyNextState := TargetProcessNextState{}
 
 	if len(name) == 0 {
-		return emptyEntity
+		return emptyNextState
 	}
 
-	for _, entity := range *entities {
-		if entity.Name == name {
-			return entity
+	for _, nextState := range assignable.EntityState.NextStates.Items {
+		if nextState.Name == name {
+			return nextState
 		}
 	}
 
-	return emptyEntity
+	return emptyNextState
+
+}
+
+func (assignable *TargetProcessAssignable) getCurrentEntityState() TargetProcessEntityState {
+
+	return assignable.EntityState
+
+}
+
+func (entityState *TargetProcessEntityState) toString() string {
+
+	return fmt.Sprintf("'%v' (id: %v)", entityState.Name, entityState.Id)
+
+}
+
+func (nextState *TargetProcessNextState) toString() string {
+
+	return fmt.Sprintf("'%v' (id: %v)", nextState.Name, nextState.Id)
 
 }
