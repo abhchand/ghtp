@@ -11,16 +11,6 @@ func validateOptions() {
 		os.Exit(1)
 	}
 
-	if githubOrganization == "" {
-		log.Fatal("Missing Github Organization. Please specify with -gh-org")
-		os.Exit(1)
-	}
-
-	if githubRepository == "" {
-		log.Fatal("Missing Github Repository. Please specify with -gh-repo")
-		os.Exit(1)
-	}
-
 	if configFile == "" {
 		log.Fatal("Missing Config File. Please specify with -config-file")
 		os.Exit(1)

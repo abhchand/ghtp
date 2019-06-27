@@ -7,6 +7,11 @@ import (
 )
 
 type Config struct {
+	Github struct {
+		Organization string `yaml:"organization"`
+		Repository   string `yaml:"repository"`
+	} `yaml:"github"`
+
 	SyncRules []SyncRule `yaml:"sync"`
 }
 

@@ -16,7 +16,7 @@ var (
 
 var cmdSync = &Command{
 	Name:             "sync",
-	Args:             "[-config-file] [-gh] [-gh-org] [-gh-repo] [-tt] [-v]",
+	Args:             "[-config-file] [-gt] [-tt] [-v]",
 	ShortDescription: "Update TargetProcess state to match Github PR state",
 	LongDescription:  "Update TargetProcess state to match Github PR state",
 	Run:              runSync,
@@ -29,10 +29,6 @@ func defineFlagsForSync() flag.FlagSet {
 
 	flagSet.StringVar(
 		&githubAuthToken, "gt", "", "Github Auth Token (Required)")
-	flagSet.StringVar(
-		&githubOrganization, "gh-org", "", "Github Org (Required)")
-	flagSet.StringVar(
-		&githubRepository, "gh-repo", "", "Github Repository (Required)")
 
 	flagSet.StringVar(
 		&configFile, "config-file", "", "Config File (Required)")
@@ -49,7 +45,19 @@ func defineFlagsForSync() flag.FlagSet {
 
 func runSync(cmd *Command, args []string) {
 
+	// Validate command line options
+
 	validateOptions()
+
+	// Parse, validate, and load Config File
+
+	config := readConfigFile()
+	log.Debugf("Config: %v", config)
+
+	validateSyncConfigFile(config)
+
+	githubOrganization = config.Github.Organization
+	githubRepository = config.Github.Repository
 
 	// Find eligible pull requests
 
@@ -61,11 +69,6 @@ func runSync(cmd *Command, args []string) {
 		log.Info("Exiting")
 		os.Exit(0)
 	}
-
-	// Parse Config File
-
-	config := readConfigFile()
-	log.Debugf("Config: %v", config)
 
 	// Set the appropriate TP state for each Pull Request
 
@@ -101,6 +104,20 @@ func runSync(cmd *Command, args []string) {
 
 		updateTargetProcessEntityState(targetProcessAssignable, nextState)
 
+	}
+
+}
+
+func validateSyncConfigFile(config Config) {
+
+	if config.Github.Organization == "" {
+		log.Fatal("Missing Github Organization. Please specify github.organization in config file")
+		os.Exit(1)
+	}
+
+	if config.Github.Repository == "" {
+		log.Fatal("Missing Github Repository. Please specify github.repository in config file")
+		os.Exit(1)
 	}
 
 }
