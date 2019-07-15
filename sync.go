@@ -58,7 +58,7 @@ func runSync(cmd *Command, args []string) {
 
 	prs := findEligiblePullRequests()
 	log.Infof("Found %v eligible pull request(s)", len(prs))
-	log.Debug(prs)
+	log.Debugf("%v", prs)
 
 	if len(prs) == 0 {
 		log.Info("Exiting")
