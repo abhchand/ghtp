@@ -100,7 +100,7 @@ func (pr *PullRequest) shouldSync() bool {
 		return false
 	}
 
-	re := regexp.MustCompile(`^(\[TP#\d+\])`)
+	re := regexp.MustCompile(`(?i)^(\[TP#\d+\])`)
 	matches := re.FindAllStringSubmatch(pr.Title, 1)
 
 	return len(matches) > 0
@@ -109,8 +109,12 @@ func (pr *PullRequest) shouldSync() bool {
 
 func (pr *PullRequest) targetProcessAssignableId() int {
 
-	re := regexp.MustCompile(`\[TP#(\d+)\]`)
+	re := regexp.MustCompile(`(?i)^\[TP#(\d+)\]`)
 	matches := re.FindAllStringSubmatch(pr.Title, 1)
+
+	if matches == nil {
+		return 0
+	}
 
 	id, err := strconv.Atoi(matches[0][1])
 	if err != nil {
