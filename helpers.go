@@ -1,9 +1,8 @@
 package main
 
-
 import (
-	"path/filepath"
 	"os"
+	"path/filepath"
 )
 
 func absolutePath(path string) string {
