@@ -7,6 +7,10 @@ import (
 
 func absolutePath(path string) string {
 
+	if string(path[0]) == "/" {
+		return path
+	}
+
 	pwd, _ := os.Getwd()
 
 	path = filepath.Clean(filepath.Join(pwd, path))
