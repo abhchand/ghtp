@@ -26,11 +26,11 @@ type SyncRule struct {
 	ThenSet string `yaml:"then_set"`
 }
 
-func readConfigFile() Config {
+func readConfigFile(filepath string) Config {
 
 	// Read file contents
 
-	contents, err := ioutil.ReadFile(configFile)
+	contents, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		panic(err)
 	}

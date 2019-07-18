@@ -48,7 +48,10 @@ func runSync(cmd *Command, args []string) {
 
 	// Parse, validate, and load Config File
 
-	config := readConfigFile()
+	configFile = absolutePath(configFile)
+	log.Debugf("Reading config file: %v", configFile)
+
+	config := readConfigFile(configFile)
 	log.Debugf("Config: %v", config)
 
 	validateSyncConfigFile(config)
