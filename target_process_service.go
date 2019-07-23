@@ -143,7 +143,7 @@ func updateTargetProcessEntityState(assignable TargetProcessAssignable, nextStat
 
 	// `queryTargetProcess()` exits or panics if there's an error, so assume
 	// everything is successful at this point
-	log.Infof("Successfully updated %v to state %v",
+	log.Infof("[TargetProcess] Successfully updated %v to state %v",
 		assignable.toString(),
 		nextState.toString())
 
