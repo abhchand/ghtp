@@ -4,6 +4,12 @@
 
 <img src="https://raw.githubusercontent.com/abhchand/ghtp/master/meta/how-it-works.png" alt="How it Works" />
 
+### Opt In
+
+The sync is purely opt-in per Pull Request. It will only consider Pull Requests that have the formatted TargetProcess ID in the title as follows:
+
+<img src="https://raw.githubusercontent.com/abhchand/ghtp/master/meta/pull-request-title.png" alt="How it Works" height="100" />
+
 # Setup
 
 Download the [latest `ghtp` release](https://github.com/abhchand/ghtp/releases)
