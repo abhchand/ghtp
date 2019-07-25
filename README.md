@@ -2,6 +2,10 @@
 
 `ghtp` is a command line utility that provides integration between Github and TargetProcess
 
+- [Setup](#setup)
+- [Run](#run)
+- [Building from Source](#building-from-source)
+
 <img src="https://raw.githubusercontent.com/abhchand/ghtp/master/meta/how-it-works.png" alt="How it Works" height="350" />
 
 ### Opt In
@@ -10,7 +14,7 @@ The sync is purely opt-in per Pull Request. It will only consider Pull Requests 
 
 <img src="https://raw.githubusercontent.com/abhchand/ghtp/master/meta/pull-request-title.png" alt="How it Works" height="65" />
 
-# Setup
+# <a name="setup"></a>Setup
 
 Download the [latest `ghtp` release](https://github.com/abhchand/ghtp/releases)
 
@@ -35,7 +39,7 @@ Fill out a new config file. To get started you can use the example file in the `
 wget --quiet "https://raw.githubusercontent.com/abhchand/ghtp/master/example/config.yml"
 ```
 
-# Run
+# <a name="run"></a>Run
 
 Run the sync
 
@@ -49,7 +53,7 @@ You can also schedule it as a regular job via `cron` or similar scheduling utili
 */5 * * * * /usr/local/bin/ghtp sync -config-file /path/to/config.yml >> /tmp/ghtp.log 2>&1
 ```
 
-# Building from Source
+# <a name="building-from-source"></a>Building from Source
 
 
 Ensure Go is installed (see [Go installation page](https://golang.org/doc/install)) and your `$GOPATH` is set
