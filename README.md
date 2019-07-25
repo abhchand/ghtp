@@ -48,3 +48,28 @@ You can also schedule it as a regular job via `cron` or similar scheduling utili
 ```
 */5 * * * * /usr/local/bin/ghtp sync -config-file /path/to/config.yml >> /tmp/ghtp.log 2>&1
 ```
+
+# Building from Source
+
+
+Ensure Go is installed (see [Go installation page](https://golang.org/doc/install)) and your `$GOPATH` is set
+
+Clone this repository:
+
+```
+mkdir -p $GOPATH/src/github.com/abhchand
+git clone https://github.com/abhchand/ghtp.git $GOPATH/src/github.com/abhchand/ghtp
+```
+
+Install [`go-dep`](https://golang.github.io/dep/docs/installation.html).
+
+```
+curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+```
+
+Build the project. If `$GOPATH/bin` is not in your `$PATH` you may have to reference `dep` as `$GOPATH/bin/dep`.
+
+```
+dep ensure
+go build
+```
