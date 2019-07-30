@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"strings"
 )
 
 var flagsForSync = defineFlagsForSync()
@@ -104,7 +105,7 @@ func synchronize(pr PullRequest, config Config) {
 		return
 	}
 
-	if currentState.Name == nextStateName {
+	if strings.ToLower(currentState.Name) == strings.ToLower(nextStateName) {
 		log.Infof("[%v] Already has state: %v ✅", pr.toString(), currentState.toString())
 		return
 	}
