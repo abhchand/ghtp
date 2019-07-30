@@ -49,12 +49,6 @@ func (assignable *TargetProcessAssignable) getCurrentEntityState() TargetProcess
 
 }
 
-func (assignable *TargetProcessAssignable) toString() string {
-
-	return fmt.Sprintf("#%v %v", assignable.Id, assignable.Name)
-
-}
-
 func (entityState *TargetProcessEntityState) toString() string {
 
 	return fmt.Sprintf("'%v' (id: %v)", entityState.Name, entityState.Id)

@@ -100,8 +100,9 @@ func synchronize(pr PullRequest, config Config) {
 	nextState := targetProcessAssignable.findNextStateByName(nextStateName)
 
 	if len(nextStateName) == 0 {
-		log.Infof("[%v] No next state could be determined from rule set",
-			pr.toString())
+		log.Infof("[%v] No next state found for '%v'",
+			pr.toString(),
+			nextStateName)
 		return
 	}
 
@@ -115,12 +116,12 @@ func synchronize(pr PullRequest, config Config) {
 		return
 	}
 
-	log.Infof("[%v] current state: %v, next state: %v",
+	log.Infof("[%v] TP state needs updating: %v -> %v",
 		pr.toString(),
 		currentState.toString(),
 		nextState.toString())
 
-	updateTargetProcessEntityState(targetProcessAssignable, nextState)
+	updateTargetProcessEntityState(pr, targetProcessAssignable, nextState)
 
 }
 

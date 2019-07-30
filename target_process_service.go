@@ -132,7 +132,7 @@ func updateEntityStatePayload(nextState TargetProcessNextState) string {
 
 }
 
-func updateTargetProcessEntityState(assignable TargetProcessAssignable, nextState TargetProcessNextState) {
+func updateTargetProcessEntityState(pr PullRequest, assignable TargetProcessAssignable, nextState TargetProcessNextState) {
 
 	// Build Request
 	url := updateEntityStateEndpoint(assignable)
@@ -143,8 +143,9 @@ func updateTargetProcessEntityState(assignable TargetProcessAssignable, nextStat
 
 	// `queryTargetProcess()` exits or panics if there's an error, so assume
 	// everything is successful at this point
-	log.Infof("[TargetProcess] Successfully updated %v to state %v",
-		assignable.toString(),
+	log.Infof("[%v] Updated TargetProcess #%v to state '%v' ☑️",
+		pr.toString(),
+		assignable.Id,
 		nextState.toString())
 
 }
