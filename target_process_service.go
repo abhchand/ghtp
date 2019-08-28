@@ -40,6 +40,23 @@ func buildAssignableRequest(url string) *http.Request {
 
 }
 
+func buildCommentRequest(url string, payload string) *http.Request {
+
+	body := bytes.NewBuffer([]byte(payload))
+
+	req, err := http.NewRequest(http.MethodPost, url, body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req.Header.Set("User-Agent", "abhchand/ghtp")
+	req.Header.Set("Content-Type", "application/json")
+
+	return req
+
+}
+
 func buildUpdateEntityStateRequest(url string, payload string) *http.Request {
 
 	body := bytes.NewBuffer([]byte(payload))
@@ -54,6 +71,47 @@ func buildUpdateEntityStateRequest(url string, payload string) *http.Request {
 	req.Header.Set("Content-Type", "application/json")
 
 	return req
+
+}
+
+func commentEndpoint() string {
+
+	return fmt.Sprintf(
+		"%v/api/v1/Comments?access_token=%v",
+		targetProcessHost(),
+		targetProcessAuthToken)
+
+}
+
+func createCommentPayload(assignable TargetProcessAssignable, pr PullRequest) string {
+
+	comment := fmt.Sprintf(
+		"Moved to '%v' based on labels in [%v](%v)",
+		assignable.EntityState.Name,
+		pr.toString(),
+		pr.HtmlUrl)
+
+	return fmt.Sprintf(
+		"{ General: { Id: %v }, Description: \"<!--markdown-->%v\" }",
+		assignable.Id,
+		comment)
+
+}
+
+func createTargetProcessComment(assignable TargetProcessAssignable, pr PullRequest) {
+
+	// Build Request
+	url := commentEndpoint()
+	payload := createCommentPayload(assignable, pr)
+	request := buildCommentRequest(url, payload)
+
+	queryTargetProcess(request)
+
+	// `queryTargetProcess()` exits or panics if there's an error, so assume
+	// everything is successful at this point
+	log.Debugf("[%v] Created TargetProcess Comment on #%v",
+		pr.toString(),
+		assignable.Id)
 
 }
 
@@ -132,7 +190,7 @@ func updateEntityStatePayload(nextState TargetProcessNextState) string {
 
 }
 
-func updateTargetProcessEntityState(pr PullRequest, assignable TargetProcessAssignable, nextState TargetProcessNextState) {
+func updateTargetProcessEntityState(pr PullRequest, assignable TargetProcessAssignable, nextState TargetProcessNextState) TargetProcessAssignable {
 
 	// Build Request
 	url := updateEntityStateEndpoint(assignable)
@@ -147,5 +205,11 @@ func updateTargetProcessEntityState(pr PullRequest, assignable TargetProcessAssi
 		pr.toString(),
 		assignable.Id,
 		nextState.toString())
+
+	// Construct an updated assignable
+	assignable.EntityState = TargetProcessEntityState{
+		Id: nextState.Id, Name: nextState.Name}
+
+	return assignable
 
 }

@@ -72,7 +72,12 @@ func runSync(cmd *Command, args []string) {
 	// Set the appropriate TP state for each Pull Request
 
 	for _, pr := range prs {
-		synchronize(pr, config)
+
+		newAssignable := synchronizeTargetProcessState(pr, config)
+
+		if newAssignable.Id != 0 {
+			createTargetProcessComment(newAssignable, pr)
+		}
 	}
 
 }
@@ -90,7 +95,9 @@ func runSync(cmd *Command, args []string) {
 //   - If none of the above apply, attempt to update TargetProcess to the desired
 //     state
 //
-func synchronize(pr PullRequest, config Config) {
+//
+// Returns the modified TargetProcess assignable with updated state if updated
+func synchronizeTargetProcessState(pr PullRequest, config Config) TargetProcessAssignable {
 
 	targetProcessAssignable := findTargetProcessAssignableById(pr.targetProcessAssignableId())
 
@@ -103,17 +110,17 @@ func synchronize(pr PullRequest, config Config) {
 		log.Infof("[%v] No next state found for '%v'",
 			pr.toString(),
 			nextStateName)
-		return
+		return TargetProcessAssignable{}
 	}
 
 	if strings.ToLower(currentState.Name) == strings.ToLower(nextStateName) {
 		log.Infof("[%v] Already has state: %v ✅", pr.toString(), currentState.toString())
-		return
+		return TargetProcessAssignable{}
 	}
 
 	if nextState.Id == 0 {
 		log.Errorf("[%v] Invalid state: %v", pr.toString(), nextState.toString())
-		return
+		return TargetProcessAssignable{}
 	}
 
 	log.Infof("[%v] TP state needs updating: %v -> %v",
@@ -121,7 +128,7 @@ func synchronize(pr PullRequest, config Config) {
 		currentState.toString(),
 		nextState.toString())
 
-	updateTargetProcessEntityState(pr, targetProcessAssignable, nextState)
+	return updateTargetProcessEntityState(pr, targetProcessAssignable, nextState)
 
 }
 
