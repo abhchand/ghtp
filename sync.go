@@ -83,7 +83,12 @@ func runSync(cmd *Command, args []string) {
 		newAssignable := synchronizeTargetProcessState(pr, config)
 
 		if shouldCreateComment && newAssignable.Id != 0 {
-			createTargetProcessComment(newAssignable, pr)
+			err := createTargetProcessComment(
+				createTargetProcessCommentUrl(), newAssignable, pr)
+
+			if err != nil {
+				log.Debug(err.Error())
+			}
 		}
 	}
 
@@ -107,6 +112,9 @@ func runSync(cmd *Command, args []string) {
 func synchronizeTargetProcessState(pr PullRequest, config Config) TargetProcessAssignable {
 
 	targetProcessAssignable := findTargetProcessAssignableById(pr.targetProcessAssignableId())
+	if targetProcessAssignable.Id == 0 {
+		return targetProcessAssignable
+	}
 
 	currentState := targetProcessAssignable.getCurrentEntityState()
 
@@ -135,7 +143,8 @@ func synchronizeTargetProcessState(pr PullRequest, config Config) TargetProcessA
 		currentState.toString(),
 		nextState.toString())
 
-	return updateTargetProcessEntityState(pr, targetProcessAssignable, nextState)
+	return updateTargetProcessEntityState(
+		updateEntityStateUrl(targetProcessAssignable), pr, targetProcessAssignable, nextState)
 
 }
 

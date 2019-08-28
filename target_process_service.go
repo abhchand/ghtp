@@ -3,10 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -40,23 +40,6 @@ func buildAssignableRequest(url string) *http.Request {
 
 }
 
-func buildCommentRequest(url string, payload string) *http.Request {
-
-	body := bytes.NewBuffer([]byte(payload))
-
-	req, err := http.NewRequest(http.MethodPost, url, body)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	req.Header.Set("User-Agent", "abhchand/ghtp")
-	req.Header.Set("Content-Type", "application/json")
-
-	return req
-
-}
-
 func buildUpdateEntityStateRequest(url string, payload string) *http.Request {
 
 	body := bytes.NewBuffer([]byte(payload))
@@ -74,16 +57,27 @@ func buildUpdateEntityStateRequest(url string, payload string) *http.Request {
 
 }
 
-func commentEndpoint() string {
+func createTargetProcessComment(createCommentUrl string, assignable TargetProcessAssignable, pr PullRequest) error {
 
-	return fmt.Sprintf(
-		"%v/api/v1/Comments?access_token=%v",
-		targetProcessHost(),
-		targetProcessAuthToken)
+	// Build Request
+	payload := createTargetProcessCommentPayload(assignable, pr)
+	request := createTargetProcessCommentRequestBuilder(createCommentUrl, payload)
+
+	// Query the API
+	_, err := queryTargetProcess(request)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("[%v] Created TargetProcess Comment on #%v",
+		pr.toString(),
+		assignable.Id)
+
+	return nil
 
 }
 
-func createCommentPayload(assignable TargetProcessAssignable, pr PullRequest) string {
+func createTargetProcessCommentPayload(assignable TargetProcessAssignable, pr PullRequest) string {
 
 	comment := fmt.Sprintf(
 		"Moved to '%v' based on labels in [%v](%v)",
@@ -98,20 +92,29 @@ func createCommentPayload(assignable TargetProcessAssignable, pr PullRequest) st
 
 }
 
-func createTargetProcessComment(assignable TargetProcessAssignable, pr PullRequest) {
+func createTargetProcessCommentRequestBuilder(url string, payload string) *http.Request {
 
-	// Build Request
-	url := commentEndpoint()
-	payload := createCommentPayload(assignable, pr)
-	request := buildCommentRequest(url, payload)
+	body := bytes.NewBuffer([]byte(payload))
 
-	queryTargetProcess(request)
+	req, err := http.NewRequest(http.MethodPost, url, body)
 
-	// `queryTargetProcess()` exits or panics if there's an error, so assume
-	// everything is successful at this point
-	log.Debugf("[%v] Created TargetProcess Comment on #%v",
-		pr.toString(),
-		assignable.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req.Header.Set("User-Agent", "abhchand/ghtp")
+	req.Header.Set("Content-Type", "application/json")
+
+	return req
+
+}
+
+func createTargetProcessCommentUrl() string {
+
+	return fmt.Sprintf(
+		"%v/api/v1/Comments?access_token=%v",
+		targetProcessHost(),
+		targetProcessAuthToken)
 
 }
 
@@ -121,11 +124,23 @@ func findTargetProcessAssignableById(id int) TargetProcessAssignable {
 	url := assignableEndpoint(id)
 	request := buildAssignableRequest(url)
 
-	responseBody := queryTargetProcess(request)
+	// Query API
+	response, err := queryTargetProcess(request)
+	if err != nil {
+		log.Error(err.Error())
+		return TargetProcessAssignable{}
+	}
+
+	// Ready response body
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
+		panic(err)
+	}
 
 	// Load Response
 	var assignable TargetProcessAssignable
-	err := json.Unmarshal([]byte(responseBody), &assignable)
+	err = json.Unmarshal([]byte(responseBody), &assignable)
 	if err != nil {
 		log.Fatal(err)
 		panic(err)
@@ -135,8 +150,7 @@ func findTargetProcessAssignableById(id int) TargetProcessAssignable {
 
 }
 
-func queryTargetProcess(request *http.Request) []byte {
-
+func queryTargetProcess(request *http.Request) (*http.Response, error) {
 	log.Debugf("[%v] %v (%v)", request.Method, request.URL.String(), request.Body)
 
 	httpClient := http.Client{Timeout: time.Second * 2}
@@ -144,26 +158,17 @@ func queryTargetProcess(request *http.Request) []byte {
 	// Query API
 	response, err := httpClient.Do(request)
 	if err != nil {
-		log.Fatal(err)
-		panic(err)
+		return response, err
 	}
 	defer response.Body.Close()
 
 	// Handle bad HTTP response
-	log.Debugf("Response Status: %s", response.Status)
 	if response.StatusCode < 200 || response.StatusCode > 299 {
-		log.Fatal("Error querying API. Exiting")
-		os.Exit(1)
+		msg := fmt.Sprintf("Error querying API (response: %s)", response.Status)
+		return response, errors.New(msg)
 	}
 
-	// Parse response
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal(err)
-		panic(err)
-	}
-
-	return body
+	return response, nil
 
 }
 
@@ -173,7 +178,7 @@ func targetProcessHost() string {
 
 }
 
-func updateEntityStateEndpoint(assignable TargetProcessAssignable) string {
+func updateEntityStateUrl(assignable TargetProcessAssignable) string {
 
 	return fmt.Sprintf(
 		"%v/api/v1/Assignables/%v?"+
@@ -190,17 +195,19 @@ func updateEntityStatePayload(nextState TargetProcessNextState) string {
 
 }
 
-func updateTargetProcessEntityState(pr PullRequest, assignable TargetProcessAssignable, nextState TargetProcessNextState) TargetProcessAssignable {
+func updateTargetProcessEntityState(updateEntityStateUrl string, pr PullRequest, assignable TargetProcessAssignable, nextState TargetProcessNextState) TargetProcessAssignable {
 
-	// Build Request
-	url := updateEntityStateEndpoint(assignable)
+	// Build Reques
 	payload := updateEntityStatePayload(nextState)
-	request := buildUpdateEntityStateRequest(url, payload)
+	request := buildUpdateEntityStateRequest(updateEntityStateUrl, payload)
 
-	queryTargetProcess(request)
+	// Query API
+	_, err := queryTargetProcess(request)
+	if err != nil {
+		log.Error(err.Error())
+		return TargetProcessAssignable{}
+	}
 
-	// `queryTargetProcess()` exits or panics if there's an error, so assume
-	// everything is successful at this point
 	log.Infof("[%v] Updated TargetProcess #%v to state '%v' ☑️",
 		pr.toString(),
 		assignable.Id,
