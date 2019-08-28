@@ -8,7 +8,8 @@ import (
 
 var flagsForSync = defineFlagsForSync()
 var (
-	configFile string
+	configFile          string
+	shouldCreateComment bool
 
 	githubOrganization string
 	githubRepository   string
@@ -20,7 +21,7 @@ var (
 
 var cmdSync = &Command{
 	Name:             "sync",
-	Args:             "[-config-file] [-v]",
+	Args:             "[-config-file] [options]",
 	ShortDescription: "Update TargetProcess state to match Github PR state",
 	LongDescription:  "Update TargetProcess state to match Github PR state",
 	Run:              runSync,
@@ -33,6 +34,12 @@ func defineFlagsForSync() flag.FlagSet {
 
 	flagSet.StringVar(
 		&configFile, "config-file", "config.yml", "YML Config File of options")
+
+	flagSet.BoolVar(
+		&shouldCreateComment,
+		"comment",
+		false,
+		"Add comment to TargetProcess Entity when its state is updated")
 
 	flagSet.BoolVar(
 		&verbose, "v", false, "Enable verbose output")
@@ -75,7 +82,7 @@ func runSync(cmd *Command, args []string) {
 
 		newAssignable := synchronizeTargetProcessState(pr, config)
 
-		if newAssignable.Id != 0 {
+		if shouldCreateComment && newAssignable.Id != 0 {
 			createTargetProcessComment(newAssignable, pr)
 		}
 	}
