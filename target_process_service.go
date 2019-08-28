@@ -137,7 +137,7 @@ func findTargetProcessAssignableById(id int) TargetProcessAssignable {
 
 func queryTargetProcess(request *http.Request) []byte {
 
-	log.Debugf("[%v] %v", request.Method, request.URL.String())
+	log.Debugf("[%v] %v (%v)", request.Method, request.URL.String(), request.Body)
 
 	httpClient := http.Client{Timeout: time.Second * 2}
 
