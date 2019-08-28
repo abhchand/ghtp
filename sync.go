@@ -111,7 +111,7 @@ func runSync(cmd *Command, args []string) {
 // Returns the modified TargetProcess assignable with updated state if updated
 func synchronizeTargetProcessState(pr PullRequest, config Config) TargetProcessAssignable {
 
-	targetProcessAssignable := findTargetProcessAssignableById(pr.targetProcessAssignableId())
+	targetProcessAssignable := findTargetProcessAssignable(pr.targetProcessAssignableId())
 	if targetProcessAssignable.Id == 0 {
 		return targetProcessAssignable
 	}
@@ -144,7 +144,7 @@ func synchronizeTargetProcessState(pr PullRequest, config Config) TargetProcessA
 		nextState.toString())
 
 	return updateTargetProcessEntityState(
-		updateEntityStateUrl(targetProcessAssignable), pr, targetProcessAssignable, nextState)
+		updateTargetProcessEntityStateUrl(targetProcessAssignable), pr, targetProcessAssignable, nextState)
 
 }
 

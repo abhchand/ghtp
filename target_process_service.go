@@ -14,49 +14,6 @@ const TP_PAGE_SIZE int = 50
 
 var targetProcessHostTemplate = "https://%v.tpondemand.com"
 
-func assignableEndpoint(assignableId int) string {
-
-	return fmt.Sprintf(
-		"%v/api/v1/Assignables/%v?"+
-			"include=[Name,EntityState[Name,NextStates[Id,Name]]]&"+
-			"format=json&access_token=%v",
-		targetProcessHost(),
-		assignableId,
-		targetProcessAuthToken)
-
-}
-
-func buildAssignableRequest(url string) *http.Request {
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	req.Header.Set("User-Agent", "abhchand/ghtp")
-
-	return req
-
-}
-
-func buildUpdateEntityStateRequest(url string, payload string) *http.Request {
-
-	body := bytes.NewBuffer([]byte(payload))
-
-	req, err := http.NewRequest(http.MethodPost, url, body)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	req.Header.Set("User-Agent", "abhchand/ghtp")
-	req.Header.Set("Content-Type", "application/json")
-
-	return req
-
-}
-
 func createTargetProcessComment(createCommentUrl string, assignable TargetProcessAssignable, pr PullRequest) error {
 
 	// Build Request
@@ -118,11 +75,71 @@ func createTargetProcessCommentUrl() string {
 
 }
 
-func findTargetProcessAssignableById(id int) TargetProcessAssignable {
+func updateTargetProcessEntityState(updateEntityStateUrl string, pr PullRequest, assignable TargetProcessAssignable, nextState TargetProcessNextState) TargetProcessAssignable {
+
+	// Build Reques
+	payload := updateTargetProcessEntityStatePayload(nextState)
+	request := updateTargetProcessEntityStateRequestBuilder(updateEntityStateUrl, payload)
+
+	// Query API
+	_, err := queryTargetProcess(request)
+	if err != nil {
+		log.Error(err.Error())
+		return TargetProcessAssignable{}
+	}
+
+	log.Infof("[%v] Updated TargetProcess #%v to state '%v' ☑️",
+		pr.toString(),
+		assignable.Id,
+		nextState.toString())
+
+	// Construct an updated assignable
+	assignable.EntityState = TargetProcessEntityState{
+		Id: nextState.Id, Name: nextState.Name}
+
+	return assignable
+
+}
+
+func updateTargetProcessEntityStatePayload(nextState TargetProcessNextState) string {
+
+	return fmt.Sprintf("{ EntityState:{Id:%v} }", nextState.Id)
+
+}
+
+func updateTargetProcessEntityStateRequestBuilder(url string, payload string) *http.Request {
+
+	body := bytes.NewBuffer([]byte(payload))
+
+	req, err := http.NewRequest(http.MethodPost, url, body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req.Header.Set("User-Agent", "abhchand/ghtp")
+	req.Header.Set("Content-Type", "application/json")
+
+	return req
+
+}
+
+func updateTargetProcessEntityStateUrl(assignable TargetProcessAssignable) string {
+
+	return fmt.Sprintf(
+		"%v/api/v1/Assignables/%v?"+
+			"resultFormat=json&resultInclude=[Id]&access_token=%v",
+		targetProcessHost(),
+		assignable.Id,
+		targetProcessAuthToken)
+
+}
+
+func findTargetProcessAssignable(id int) TargetProcessAssignable {
 
 	// Build Request
-	url := assignableEndpoint(id)
-	request := buildAssignableRequest(url)
+	url := findTargetProcessAssignableUrl(id)
+	request := findTargetProcessAssignableRequestBuilder(url)
 
 	// Query API
 	response, err := queryTargetProcess(request)
@@ -151,6 +168,32 @@ func findTargetProcessAssignableById(id int) TargetProcessAssignable {
 
 }
 
+func findTargetProcessAssignableRequestBuilder(url string) *http.Request {
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	req.Header.Set("User-Agent", "abhchand/ghtp")
+
+	return req
+
+}
+
+func findTargetProcessAssignableUrl(assignableId int) string {
+
+	return fmt.Sprintf(
+		"%v/api/v1/Assignables/%v?"+
+			"include=[Name,EntityState[Name,NextStates[Id,Name]]]&"+
+			"format=json&access_token=%v",
+		targetProcessHost(),
+		assignableId,
+		targetProcessAuthToken)
+
+}
+
 func queryTargetProcess(request *http.Request) (*http.Response, error) {
 	log.Debugf("[%v] %v (%v)", request.Method, request.URL.String(), request.Body)
 
@@ -175,48 +218,5 @@ func queryTargetProcess(request *http.Request) (*http.Response, error) {
 func targetProcessHost() string {
 
 	return fmt.Sprintf(targetProcessHostTemplate, targetProcessDomain)
-
-}
-
-func updateEntityStateUrl(assignable TargetProcessAssignable) string {
-
-	return fmt.Sprintf(
-		"%v/api/v1/Assignables/%v?"+
-			"resultFormat=json&resultInclude=[Id]&access_token=%v",
-		targetProcessHost(),
-		assignable.Id,
-		targetProcessAuthToken)
-
-}
-
-func updateEntityStatePayload(nextState TargetProcessNextState) string {
-
-	return fmt.Sprintf("{ EntityState:{Id:%v} }", nextState.Id)
-
-}
-
-func updateTargetProcessEntityState(updateEntityStateUrl string, pr PullRequest, assignable TargetProcessAssignable, nextState TargetProcessNextState) TargetProcessAssignable {
-
-	// Build Reques
-	payload := updateEntityStatePayload(nextState)
-	request := buildUpdateEntityStateRequest(updateEntityStateUrl, payload)
-
-	// Query API
-	_, err := queryTargetProcess(request)
-	if err != nil {
-		log.Error(err.Error())
-		return TargetProcessAssignable{}
-	}
-
-	log.Infof("[%v] Updated TargetProcess #%v to state '%v' ☑️",
-		pr.toString(),
-		assignable.Id,
-		nextState.toString())
-
-	// Construct an updated assignable
-	assignable.EntityState = TargetProcessEntityState{
-		Id: nextState.Id, Name: nextState.Name}
-
-	return assignable
 
 }
