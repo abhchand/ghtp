@@ -131,7 +131,8 @@ func findTargetProcessAssignableById(id int) TargetProcessAssignable {
 		return TargetProcessAssignable{}
 	}
 
-	// Ready response body
+	// Read response body
+	defer response.Body.Close()
 	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -160,7 +161,6 @@ func queryTargetProcess(request *http.Request) (*http.Response, error) {
 	if err != nil {
 		return response, err
 	}
-	defer response.Body.Close()
 
 	// Handle bad HTTP response
 	if response.StatusCode < 200 || response.StatusCode > 299 {
