@@ -20,17 +20,17 @@ Download the [latest `ghtp` release](https://github.com/abhchand/ghtp/releases)
 
 ```
 # linux
-wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.1-beta/ghtp0.1-beta.linux-amd64.tar.gz
+wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.1/ghtp0.1.linux-amd64.tar.gz
 
 # OSX
-wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.1-beta/ghtp0.1-beta.darwin-amd64.tar.gz
+wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.1/ghtp0.1.darwin-amd64.tar.gz
 ```
 
 Extract the file and move the executable to somewhere in your `$PATH`
 
 ```
-tar -v -xzf ghtp0.1-beta.darwin-amd64.tar.gz
-mv ghtp0.1-beta.darwin-amd64/ghtp /usr/local/bin/
+tar -v -xzf ghtp0.1.darwin-amd64.tar.gz
+mv ghtp /usr/local/bin/
 ```
 
 Fill out a new config file. To get started you can use the example file in the `ghtp` repository:
