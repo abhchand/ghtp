@@ -20,10 +20,10 @@ Download the [latest `ghtp` release](https://github.com/abhchand/ghtp/releases)
 
 ```
 # linux
-wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.1/ghtp0.1.linux-amd64.tar.gz
+wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.2/ghtp0.2.linux-amd64.tar.gz
 
 # OSX
-wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.1/ghtp0.1.darwin-amd64.tar.gz
+wget --quiet https://github.com/abhchand/ghtp/releases/download/v0.2/ghtp0.2.darwin-amd64.tar.gz
 ```
 
 Extract the file and move the executable to somewhere in your `$PATH`
