@@ -51,3 +51,26 @@ func TestCreateTargetProcessComment(t *testing.T) {
 	})
 
 }
+
+func TestCreateTargetProcessCommentPayload(t *testing.T) {
+	log = initializeLogger()
+
+	// Setup Data
+	// Setup Data
+	entityState := TargetProcessEntityState{Id: 99, Name: "Development"}
+	assignable := TargetProcessAssignable{Id: 21, Name: "My Cool Story", EntityState: entityState}
+	pr := PullRequest{Id: 1, HtmlUrl: "github.com/foo", Title: "My PR"}
+
+	t.Run("Success", func(t *testing.T) {
+
+		actual := createTargetProcessCommentPayload(assignable, pr)
+		expected := "{ General: { Id: 21 }, Description: \"" +
+			"<!--markdown-->Moved to 'Development' based on labels in [/#1](github.com/foo)\" }"
+
+		if actual != expected {
+			t.Error("expected", expected, "got", actual)
+		}
+
+	})
+
+}
