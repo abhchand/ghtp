@@ -17,6 +17,8 @@ var (
 
 	targetProcessDomain    string
 	targetProcessAuthToken string
+
+	processedTargetProcessAssignableIds []int
 )
 
 var cmdSync = &Command{
@@ -74,6 +76,8 @@ func runSync(cmd *Command, args []string) {
 	if len(prs) == 0 {
 		log.Info("Exiting")
 		os.Exit(0)
+	} else {
+		processedTargetProcessAssignableIds = []int{}
 	}
 
 	// Set the appropriate TP state for each Pull Request
@@ -101,6 +105,9 @@ func runSync(cmd *Command, args []string) {
 // It also performs type checking against TargetProcess to ensure that the
 // desired state is a valid workflow state for that Assignable to move to.
 //
+//
+//   - If a TP assignable is already associated with another previously processed
+//     PR, skip it.
 //   - If no action can be deterined from the rule set, do nothing
 //   - If a TP Assignable already has the desired state, do nothing
 //   - If the desired TargetProcess state is invalid, log an error and continue
@@ -112,9 +119,24 @@ func runSync(cmd *Command, args []string) {
 func synchronizeTargetProcessState(pr PullRequest, config Config) TargetProcessAssignable {
 
 	targetProcessAssignable := findTargetProcessAssignable(pr.targetProcessAssignableId())
+
 	if targetProcessAssignable.Id == 0 {
 		return targetProcessAssignable
 	}
+
+	//  Check if this TP item has already been updated as part of another PR
+
+	if isTargetProcessAssignableProcessed(targetProcessAssignable.Id) {
+		log.Infof("[%v] TP#'%v' already associated with another PR",
+			pr.toString(),
+			targetProcessAssignable.Id)
+		return TargetProcessAssignable{}
+	}
+
+	processedTargetProcessAssignableIds = append(
+		processedTargetProcessAssignableIds, targetProcessAssignable.Id)
+
+	// Calculate currernt and next state
 
 	currentState := targetProcessAssignable.getCurrentEntityState()
 
@@ -208,4 +230,15 @@ func validateSyncConfigFile(config Config) {
 		os.Exit(1)
 	}
 
+}
+
+func isTargetProcessAssignableProcessed(item int) bool {
+
+	for i := 0; i < len(processedTargetProcessAssignableIds); i++ {
+		if processedTargetProcessAssignableIds[i] == item {
+			return true
+		}
+	}
+
+	return false
 }
