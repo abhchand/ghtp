@@ -65,7 +65,7 @@ func TestCreateTargetProcessCommentPayload(t *testing.T) {
 
 		actual := createTargetProcessCommentPayload(assignable, pr)
 		expected := "{ General: { Id: 21 }, Description: \"" +
-			"<!--markdown-->Moved to 'Development' based on labels in [/#1](github.com/foo)\" }"
+			"<!--markdown-->Moved to 'Development' based on [/#1](github.com/foo)\" }"
 
 		if actual != expected {
 			t.Error("expected", expected, "got", actual)

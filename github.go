@@ -7,9 +7,10 @@ import (
 )
 
 type PullRequest struct {
-	Id      int    `json:"number"`
-	HtmlUrl string `json:"html_url"`
-	Title   string `json:"title"`
+	Id       int    `json:"number"`
+	HtmlUrl  string `json:"html_url"`
+	Title    string `json:"title"`
+	MergedAt string `json:"merged_at"`
 
 	Labels          []PullRequestLabel `json:"labels"`
 	PullRequestData map[string]string  `json:"pull_request"`
@@ -27,6 +28,9 @@ type PullRequestList []PullRequest
 // Rules are applied in the defined order and the first succesful match is
 // returned.
 //
+// The special keyword `:pr_merged:` can be used to identify the state when
+// the PR is merged (different from closed).
+//
 // All labels and states are case sensitive
 //
 // Example:
@@ -34,6 +38,8 @@ type PullRequestList []PullRequest
 // Assume the following config defined in the YAML file
 //
 //     sync:
+//       - if_has: :pr_merged:
+//         then_set: Shipped
 //       - if_has: chennai
 //         then_set: Development
 //       - if_has: bangalore
@@ -41,7 +47,7 @@ type PullRequestList []PullRequest
 //       - if_has: mumbai
 //         then_set: Code Review
 //
-// If a `PullRequest` had labels ["bangalore", "mumbai"], the expected
+// If an open `PullRequest` had labels ["bangalore", "mumbai"], the expected
 // TargetProcess state returned would be "Shipped"
 //
 func (pr *PullRequest) expectedTargetProcessNextStateName(rules []SyncRule) string {
@@ -50,7 +56,9 @@ func (pr *PullRequest) expectedTargetProcessNextStateName(rules []SyncRule) stri
 		label := rule.IfHas
 		state := rule.ThenSet
 
-		if pr.hasLabel(label) {
+		if label == ":pr_merged:" && pr.isMerged() {
+			return state
+		} else if pr.hasLabel(label) {
 			return state
 		}
 	}
@@ -71,20 +79,8 @@ func (pr *PullRequest) hasLabel(label string) bool {
 
 }
 
-// NOTE: Github API treats all pull requests as Issues. That is, all pull
-// requests are issues but not all issues are pull requests.
-//
-// In fact, the underlying API endpoint we are querying is for issues, but
-// we are modeling this data structure as a Pull Request for convenience
-// sake.
-//
-// To dinstiguish which issues are in fact truly pull requests, Github
-// recommends looking for the presence of a `pull_request` key, which
-// is what this function looks for
-func (pr *PullRequest) isTrulyPullRequest() bool {
-
-	return len(pr.PullRequestData) > 0
-
+func (pr *PullRequest) isMerged() bool {
+	return len(pr.MergedAt) > 0
 }
 
 // Check whether this Pull Request is eligible to be included
@@ -95,10 +91,6 @@ func (pr *PullRequest) isTrulyPullRequest() bool {
 //   - If PR Title starts with '[TP#1234]', case insensitive.
 //
 func (pr *PullRequest) shouldSync() bool {
-
-	if !pr.isTrulyPullRequest() {
-		return false
-	}
 
 	re := regexp.MustCompile(`(?i)^(\[TP#\d+\])`)
 	matches := re.FindAllStringSubmatch(pr.Title, 1)

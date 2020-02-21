@@ -23,13 +23,19 @@ sync:
   # Translates to "If a Github PR has the label 'Reviewable', ensure the corresponding
   # TargetProcess entity is set to the 'Code Review' state
   #
+  # The special keyword ":pr_merged:" can be used to match the Github state where a
+  # PR is merged (different from "closed"!)
+  #
   # Each Pull Request can only be targeted by up to 1 rule below, and they are applied
-  # in the order below. The first matching rule dictates the state.
+  # in the order below, with the first matching rule dictating the state. The one exception
+  # is that merged PRs are processed before all other PRs, always.
   #
   # Pull Requests must *opt in* to being synchronized with TargetProcess. Only those
   # Pull requests starting with "[TP#XXXX]" (where "XXXX" is the TargetProcess entity
   # ID) will be synchronized.
 
+  - if_has: ":pr_merged:"
+    then_set: Shipped
   - if_has: WIP
     then_set: Development
   - if_has: Code Review

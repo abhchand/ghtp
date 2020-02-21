@@ -25,12 +25,12 @@ func buildIssueRequest(url string) *http.Request {
 
 }
 
-func findEligiblePullRequests() PullRequestList {
+func findEligiblePullRequests(url string, maxPages int) PullRequestList {
 
 	httpClient := http.Client{Timeout: time.Second * 2}
 
 	var prList PullRequestList
-	url := issuesEndpoint()
+	curPage := 0
 
 	// Loop through each page
 	for {
@@ -46,6 +46,8 @@ func findEligiblePullRequests() PullRequestList {
 			panic(err)
 		}
 		defer response.Body.Close()
+
+		curPage += 1
 
 		// Handle bad HTTP response
 		log.Debugf("Response Status: %s", response.Status)
@@ -73,7 +75,13 @@ func findEligiblePullRequests() PullRequestList {
 		for _, pr := range prs {
 			if pr.shouldSync() {
 				prList = append(prList, pr)
+				// log.Infof("PULL REQUEST MERGED: %v, %v", pr.Id, pr.MergedAt)
 			}
+		}
+
+		// Check if we should continue (whether `maxPages` has been reached)
+		if maxPages > 0 && curPage == maxPages {
+			break
 		}
 
 		// Check if we should continue (whether a next page exists)
@@ -92,13 +100,25 @@ func findEligiblePullRequests() PullRequestList {
 
 }
 
-func issuesEndpoint() string {
+func pullRequestsEndpoint(state string) string {
 
 	return fmt.Sprintf(
-		"https://api.github.com/repos/%s/%s/issues?state=open&direction=desc",
+		"https://api.github.com/repos/%s/%s/pulls?state=%s&direction=desc",
 		githubOrganization,
-		githubRepository)
+		githubRepository,
+		state)
 
+}
+
+func filterMerged(prs PullRequestList) (ret PullRequestList) {
+
+	for _, pr := range prs {
+		if pr.isMerged() {
+			ret = append(ret, pr)
+		}
+	}
+
+	return
 }
 
 func parseNextUrl(linkHeader []string) string {

@@ -69,11 +69,17 @@ func runSync(cmd *Command, args []string) {
 
 	// Find eligible pull requests
 
-	prs := findEligiblePullRequests()
-	log.Infof("Found %v eligible pull request(s)", len(prs))
-	log.Debugf("%v", prs)
+	mergedPrs := filterMerged(findEligiblePullRequests(pullRequestsEndpoint("closed"), 1))
+	log.Infof("Found %v merged pull request(s)", len(mergedPrs))
+	log.Debugf("%v", mergedPrs)
 
-	if len(prs) == 0 {
+	openPrs := findEligiblePullRequests(pullRequestsEndpoint("open"), 0)
+	log.Infof("Found %v open pull request(s)", len(openPrs))
+	log.Debugf("%v", openPrs)
+
+	allPrs := append(mergedPrs, openPrs...)
+
+	if len(allPrs) == 0 {
 		log.Info("Exiting")
 		os.Exit(0)
 	} else {
@@ -82,7 +88,7 @@ func runSync(cmd *Command, args []string) {
 
 	// Set the appropriate TP state for each Pull Request
 
-	for _, pr := range prs {
+	for _, pr := range allPrs {
 
 		newAssignable := synchronizeTargetProcessState(pr, config)
 

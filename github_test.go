@@ -182,32 +182,6 @@ func TestTargetShouldSync(t *testing.T) {
 
 }
 
-func TestTargetShouldSyncWhenNotTrulyPullRequest(t *testing.T) {
-
-	testCases := map[string]bool{
-		"[TP#1234] foo":     false,
-		"[tp#1234] foo":     false,
-		"[TP#1234]":         false,
-		"foo [TP#1234] foo": false,
-		"TP#1234 foo":       false,
-	}
-
-	for title, expected := range testCases {
-		pr := PullRequest{
-			Id:              1,
-			HtmlUrl:         "github.com/foo",
-			Title:           title,
-			PullRequestData: map[string]string{}}
-
-		actual := pr.shouldSync()
-
-		if actual != expected {
-			t.Error("expected", expected, "got", actual)
-		}
-	}
-
-}
-
 func TestTargetProcessAssignableId(t *testing.T) {
 
 	testCases := map[string]int{

@@ -37,7 +37,7 @@ func createTargetProcessComment(createCommentUrl string, assignable TargetProces
 func createTargetProcessCommentPayload(assignable TargetProcessAssignable, pr PullRequest) string {
 
 	comment := fmt.Sprintf(
-		"Moved to '%v' based on labels in [%v](%v)",
+		"Moved to '%v' based on [%v](%v)",
 		assignable.EntityState.Name,
 		pr.toString(),
 		pr.HtmlUrl)

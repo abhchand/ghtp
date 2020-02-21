@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-const version = "0.3"
+const version = "0.4"
 
 var flagsForVersion = defineFlagsForVersion()
 
