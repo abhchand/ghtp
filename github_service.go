@@ -27,7 +27,7 @@ func buildIssueRequest(url string) *http.Request {
 
 func findEligiblePullRequests(url string, maxPages int) PullRequestList {
 
-	httpClient := http.Client{Timeout: time.Second * 2}
+	httpClient := http.Client{Timeout: time.Second * 10}
 
 	var prList PullRequestList
 	curPage := 0
