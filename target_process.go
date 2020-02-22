@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 type TargetProcessAssignable struct {
@@ -34,7 +35,7 @@ func (assignable *TargetProcessAssignable) findNextStateByName(name string) Targ
 	}
 
 	for _, nextState := range assignable.EntityState.NextStates.Items {
-		if nextState.Name == name {
+		if strings.ToLower(nextState.Name) == strings.ToLower(name) {
 			return nextState
 		}
 	}
